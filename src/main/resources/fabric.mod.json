@@ -1,0 +1,25 @@
+{
+	"schemaVersion": 1,
+	"id": "minecraftmpris",
+	"version": "${version}",
+	"name": "MinecraftMPRIS",
+	"description": "Control music within Minecraft using MPRIS (and playerctl)",
+	"authors": [
+		"itsaschoolbus"
+	],
+	"contact": {},
+	"license": "GPL-3.0-or-later",
+	"icon": "assets/minecraftmpris/icon.png",
+	"environment": "client",
+	"entrypoints": {
+    	"client": [
+      		"vn.nhu2410.minecraftmpris.MinecraftMpris"
+    	]
+  	},
+	"depends": {
+		"fabricloader": ">=0.18.4",
+		"minecraft": "~1.21.11",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}
