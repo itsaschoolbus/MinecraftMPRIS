@@ -3,12 +3,21 @@
 	"id": "minecraftmpris",
 	"version": "${version}",
 	"name": "MinecraftMPRIS",
-	"description": "Control music within Minecraft using MPRIS (and playerctl)",
-	"authors": [
-		"itsaschoolbus"
+	"description": "Control media within Minecraft, with MPRIS",
+	"authors" : [
+		{
+			"name" : "Nhu (itsaschoolbus)",
+			"contact" : {
+				"email" : "itsaschoolbus@proton.me"
+			}
+		}
 	],
-	"contact": {},
-	"license": "GPL-3.0-or-later",
+	"contact" : {
+		"homepage" : "https://github.com/itsaschoolbus/MinecraftMPRIS",
+		"sources" : "https://github.com/itsaschoolbus/MinecraftMPRIS",
+		"issues" : "https://github.com/itsaschoolbus/MinecraftMPRIS/issues"
+	},
+	"license": "LGPL-3.0-or-later",
 	"icon": "assets/minecraftmpris/icon.png",
 	"environment": "client",
 	"entrypoints": {

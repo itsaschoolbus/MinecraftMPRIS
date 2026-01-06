@@ -22,65 +22,58 @@ public class MinecraftMpris implements ClientModInitializer {
     private static KeyMapping playPauseKey;
     private static KeyMapping nextTrackKey;
     private static KeyMapping prevTrackKey;
-    private static KeyMapping showInfoKey;
 
-    private static final KeyMapping.Category MPRIS_CATEGORY =
-        new KeyMapping.Category(
-            Identifier.fromNamespaceAndPath(MOD_ID, "controls")
-        );
+    private static final KeyMapping.Category MPRIS = new KeyMapping.Category(Identifier.fromNamespaceAndPath(MOD_ID, "controls"));
 
     @Override
     public void onInitializeClient() {
-        // Register key bindings
+        // register overlay
+        MusicOverlay.register();
+
+        // register key bindings
         playPauseKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
-            "key.minecraftmpris.playpause",
+            "minecraftmpris.playpause",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_P,
-            MPRIS_CATEGORY
+            MPRIS
         ));
 
         nextTrackKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
-            "key.minecraftmpris.next",
+            "minecraftmpris.next",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_RIGHT_BRACKET,
-            MPRIS_CATEGORY
+            MPRIS
         ));
 
         prevTrackKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
-            "key.minecraftmpris.previous",
+            "minecraftmpris.previous",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_LEFT_BRACKET,
-            MPRIS_CATEGORY
+            MPRIS
         ));
 
-        showInfoKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
-            "key.minecraftmpris.info",
-            InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_I,
-            MPRIS_CATEGORY
-        ));
-
-        // Register tick event for key handling
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player == null) return;
 
+            // register key handling
             while (playPauseKey.consumeClick()) {
-                executeCommand("PlayPause");
-                client.player.displayClientMessage(Component.literal("§6Music: §fPlay/Pause"), true);
+                executeCommand("play-pause");
+                client.player.displayClientMessage(Component.translatable("ingame.minecraftmpris.prefix").append(Component.translatable("ingame.minecraftmpris.playpause")), true);
             }
 
             while (nextTrackKey.consumeClick()) {
-                executeCommand("Next");
-                client.player.displayClientMessage(Component.literal("§6Music: §fNext Track"), true);
+                executeCommand("next");
+                client.player.displayClientMessage(Component.translatable("ingame.minecraftmpris.prefix").append(Component.translatable("ingame.minecraftmpris.next")), true);
             }
 
             while (prevTrackKey.consumeClick()) {
-                executeCommand("Previous");
-                client.player.displayClientMessage(Component.literal("§6Music: §fPrevious Track"), true);
+                executeCommand("previous");
+                client.player.displayClientMessage(Component.translatable("ingame.minecraftmpris.prefix").append(Component.translatable("ingame.minecraftmpris.previous")), true);
             }
 
-            while (showInfoKey.consumeClick()) {
-                showCurrentTrack(client);
+            // update metadata every 20 ticks (1 sec)
+            if (client.level != null && client.level.getGameTime() % 20 == 0) {
+                updateTrackInfo();
             }
         });
     }
@@ -90,9 +83,7 @@ public class MinecraftMpris implements ClientModInitializer {
             try {
                 String[] cmd = {
                     "bash", "-c",
-                    "playerctl " + command.toLowerCase() + " 2>/dev/null || " +
-                    "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.* " +
-                    "/org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player." + command
+                    "playerctl " + command.toLowerCase() + " 2>/dev/null"
                 };
                 
                 Process process = Runtime.getRuntime().exec(cmd);
@@ -103,35 +94,58 @@ public class MinecraftMpris implements ClientModInitializer {
         }).start();
     }
 
-    private void showCurrentTrack(Minecraft client) {
+    private void updateTrackInfo() {
         new Thread(() -> {
             try {
+                String metadataFormat = "'{{title}}|{{artist}}|{{position}}|{{mpris:length}}|{{status}}|{{mpris:artUrl}}'";
                 String[] cmd = {
                     "bash", "-c",
-                    "playerctl metadata --format '{{artist}} - {{title}}' 2>/dev/null || " +
-                    "echo 'No player found'"
+                    // prefer plasma browser integration if it exists
+                    "playerctl metadata --format " + metadataFormat +
+                    " -p plasma-browser-integration 2>/dev/null " +
+                    "|| playerctl metadata --format " + metadataFormat +
+                    " 2>/dev/null " +
+                    "|| echo 'Unknown|Unknown|0|0|Paused|'"
                 };
-                
+
                 Process process = Runtime.getRuntime().exec(cmd);
-                BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream())
-                );
-                
-                String trackInfo = reader.readLine();
-                if (trackInfo != null && !trackInfo.isEmpty()) {
-                    client.execute(() -> {
-                        if (client.player != null) {
-                            client.player.displayClientMessage(
-                                Component.literal("§6Now Playing: §f" + trackInfo),
-                                false
-                            );
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                String line = reader.readLine();
+
+                if (line != null && !line.isEmpty()) {
+                    String[] p = line.split("\\|");
+
+                    float posSeconds = Float.parseFloat(p[2]) / 1_000_000f;
+                    long lenMicros = Long.parseLong(p[3]);
+
+                    Minecraft.getInstance().execute(() -> {
+                        MusicOverlay.title  = p[0];
+                        MusicOverlay.artist = p[1];
+
+                        // fallback for when artist is in title (spotify chromium w/o integration)
+                        if (MusicOverlay.artist == null || MusicOverlay.artist.isEmpty()) {
+                            String t = MusicOverlay.title;
+                            if (t.contains(" • ")) {
+                                String[] parts = t.split(" • ");
+                                MusicOverlay.title = parts[0];
+                                MusicOverlay.artist = parts[1];
+                            } else {
+                                MusicOverlay.artist = "Unknown Artist";
+                            }
+                        }
+
+                        MusicOverlay.position = (int) posSeconds;
+                        MusicOverlay.length = (int) (lenMicros / 1_000_000);
+                        MusicOverlay.playing = p[4].equalsIgnoreCase("Playing");
+
+                        if (p.length > 5 && p[5] != null && !p[5].isEmpty()) {
+                            MusicOverlay.artUrl = p[5];
                         }
                     });
                 }
-                
                 process.waitFor();
             } catch (Exception e) {
-                LOGGER.error("Failed to get track info", e);
+                LOGGER.error("Failed to read metadata", e);
             }
         }).start();
     }
