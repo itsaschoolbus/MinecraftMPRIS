@@ -1,7 +1,8 @@
 package vn.nhu2410.minecraftmpris;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -27,10 +28,18 @@ public class MusicOverlay {
     private static String lastArtUrl = null;
 
     public static void register() {
-        HudRenderCallback.EVENT.register(MusicOverlay::renderOverlay);
+        Identifier overlayId = Identifier.fromNamespaceAndPath(
+            MinecraftMpris.MOD_ID,
+            "music_overlay"
+        );
+        HudElementRegistry.attachElementBefore(
+            VanillaHudElements.CHAT,
+            overlayId,
+            (gui, delta) -> renderOverlay(gui, delta)
+        );
     }
 
-    public static void renderOverlay(GuiGraphics gui, DeltaTracker delta) {
+    private static void renderOverlay(GuiGraphics gui, DeltaTracker delta) {
         Minecraft mc = Minecraft.getInstance();
         if (mc == null || mc.player == null) return;
         if (title == null || title.isEmpty() || length <= 0) return;
