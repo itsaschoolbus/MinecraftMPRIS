@@ -1,10 +1,10 @@
 {
   "key.category.minecraftmpris.controls": "MinecraftMPRIS",
-  "minecraftmpris.playpause": "Play/Pause Music",
-  "minecraftmpris.next": "Next Track",
-  "minecraftmpris.previous": "Previous Track",
-  "ingame.minecraftmpris.prefix": "§6Music: §f",
-  "ingame.minecraftmpris.playpause": "Play/Pause",
-  "ingame.minecraftmpris.next": "Next Track",
-  "ingame.minecraftmpris.previous": "Previous Track"
+  "key.minecraftmpris.playpause": "Play/Pause Music",
+  "key.minecraftmpris.next": "Next Track",
+  "key.minecraftmpris.previous": "Previous Track",
+  "ingamemsg.minecraftmpris.prefix": "§6Music: §f",
+  "ingamemsg.minecraftmpris.playpause": "Play/Pause",
+  "ingamemsg.minecraftmpris.next": "Next Track",
+  "ingamemsg.minecraftmpris.previous": "Previous Track"
 }

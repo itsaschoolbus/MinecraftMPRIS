@@ -1,6 +1,10 @@
-package vn.nhu2410.minecraftmpris;
+package vn.nhu2410.minecraftmpris.overlay;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import java.awt.image.BufferedImage;
+import java.io.InputStream;
+import java.net.URI;
+import javax.imageio.ImageIO;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.minecraft.client.DeltaTracker;
@@ -9,15 +13,9 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
+import vn.nhu2410.minecraftmpris.MinecraftMprisClient;
 
-import java.awt.image.BufferedImage;
-import java.io.InputStream;
-import java.net.URI;
-
-import javax.imageio.ImageIO;
-
-public class MusicOverlay {
-
+public class MediaOverlay {
     public static String title = "Unknown Title";
     public static String artist = "Unknown Artist";
     public static int position = 0;
@@ -29,9 +27,9 @@ public class MusicOverlay {
     private static Identifier albumArtId = null;
     private static String lastArtUrl = null;
 
-    public static void register() {
+    public static void registerMediaOverlay() {
         Identifier overlayId = Identifier.fromNamespaceAndPath(
-            MinecraftMpris.MOD_ID,
+            MinecraftMprisClient.MOD_ID,
             "music_overlay"
         );
         HudElementRegistry.attachElementBefore(
@@ -66,7 +64,14 @@ public class MusicOverlay {
 
         // album art
         if (albumArtTexture != null && albumArtId != null) {
-            gui.blit(RenderPipelines.GUI_TEXTURED, albumArtId, x + 5, y + 5, 0, 0, albumArtSize, albumArtSize, albumArtSize, albumArtSize);
+            gui.blit(
+                RenderPipelines.GUI_TEXTURED,
+                albumArtId,
+                x + 5, y + 5,
+                0, 0,
+                albumArtSize, albumArtSize,
+                albumArtSize, albumArtSize
+            );
         } else {
             gui.fill(x + 5, y + 5, x + 5 + albumArtSize, y + 5 + albumArtSize, 0xFF333333);
         }
@@ -120,7 +125,7 @@ public class MusicOverlay {
                 stream.close();
 
                 if (bufferedImage == null) {
-                    MinecraftMpris.LOGGER.warn("ImageIO returned null for URL: " + url);
+                    MinecraftMprisClient.LOGGER.warn("ImageIO returned null for URL: " + url);
                     clearAlbumArt(mc);
                     return;
                 }
@@ -142,11 +147,11 @@ public class MusicOverlay {
                         if (albumArtTexture != null) {
                             albumArtTexture.close();
                         }
-                        albumArtId = Identifier.fromNamespaceAndPath(MinecraftMpris.MOD_ID, "albumart");
+                        albumArtId = Identifier.fromNamespaceAndPath(MinecraftMprisClient.MOD_ID, "albumart");
                         albumArtTexture = new DynamicTexture(() -> "albumart", finalImage);
                         mc.getTextureManager().register(albumArtId, albumArtTexture);
                     } catch (Exception e) {
-                        MinecraftMpris.LOGGER.error("Failed to register album art texture", e);
+                        MinecraftMprisClient.LOGGER.error("Failed to register album art texture", e);
                         if (finalImage != null) {
                             finalImage.close();
                         }
@@ -154,7 +159,7 @@ public class MusicOverlay {
                     }
                 });
             } catch (Exception e) {
-                MinecraftMpris.LOGGER.error("Failed to load album art from URL: " + url, e);
+                MinecraftMprisClient.LOGGER.error("Failed to load album art from URL: " + url, e);
                 if (nativeImage != null) {
                     nativeImage.close();
                 }
