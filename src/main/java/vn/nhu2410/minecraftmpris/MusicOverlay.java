@@ -10,9 +10,11 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.net.URL;
+import java.io.InputStream;
+import java.net.URI;
+
+import javax.imageio.ImageIO;
 
 public class MusicOverlay {
 
@@ -52,7 +54,7 @@ public class MusicOverlay {
 
         int width = mc.getWindow().getGuiScaledWidth();
 
-        int albumSize = 48;
+        int albumArtSize = 48;
         int boxWidth = 200;
         int boxHeight = 58;
 
@@ -64,14 +66,14 @@ public class MusicOverlay {
 
         // album art
         if (albumArtTexture != null && albumArtId != null) {
-            gui.blit(RenderPipelines.GUI_TEXTURED, albumArtId, x + 5, y + 5, 0, 0, albumSize, albumSize, albumSize, albumSize);
+            gui.blit(RenderPipelines.GUI_TEXTURED, albumArtId, x + 5, y + 5, 0, 0, albumArtSize, albumArtSize, albumArtSize, albumArtSize);
         } else {
-            gui.fill(x + 5, y + 5, x + 5 + albumSize, y + 5 + albumSize, 0xFF333333);
+            gui.fill(x + 5, y + 5, x + 5 + albumArtSize, y + 5 + albumArtSize, 0xFF333333);
         }
 
         // text after album art
-        int textX = x + albumSize + 12;
-        int textWidth = boxWidth - albumSize - 17;
+        int textX = x + albumArtSize + 12;
+        int textWidth = boxWidth - albumArtSize - 17;
 
         String displayTitle = truncateText(mc, title, textWidth);
         String displayArtist = truncateText(mc, artist, textWidth);
@@ -103,7 +105,7 @@ public class MusicOverlay {
         // time
         String timeStr = formatTime(position) + " / " + formatTime(length);
         gui.drawString(mc.font, timeStr, textX, y + 43, 0xFFCCCCCC, false);
-        
+
         // playing indicator
         String playStatus = playing ? "▶" : "⏸";
         gui.drawString(mc.font, playStatus, x + boxWidth - 15, y + 43, 0xFFFFFFFF, false);
@@ -111,51 +113,74 @@ public class MusicOverlay {
 
     private static void loadAlbumArt(Minecraft mc, String url) {
         new Thread(() -> {
+            NativeImage nativeImage = null;
             try {
-                BufferedImage image = ImageIO.read(new URL(url));
-                if (image == null) return;
+                InputStream stream = URI.create(url).toURL().openStream();
+                BufferedImage bufferedImage = ImageIO.read(stream);
+                stream.close();
 
-                // resize to 48x48
-                BufferedImage resized = new BufferedImage(48, 48, BufferedImage.TYPE_INT_ARGB);
-                java.awt.Graphics2D g2d = resized.createGraphics();
-                g2d.drawImage(image, 0, 0, 48, 48, null);
-                g2d.dispose();
+                if (bufferedImage == null) {
+                    MinecraftMpris.LOGGER.warn("ImageIO returned null for URL: " + url);
+                    clearAlbumArt(mc);
+                    return;
+                }
 
-                // convert to NativeImage
-                NativeImage nativeImage = new NativeImage(NativeImage.Format.RGBA, 48, 48, true);
-                for (int y = 0; y < 48; y++) {
-                    for (int x = 0; x < 48; x++) {
-                        int argb = resized.getRGB(x, y);
+                int width = bufferedImage.getWidth();
+                int height = bufferedImage.getHeight();
+                nativeImage = new NativeImage(width, height, true);
+
+                for (int y = 0; y < height; y++) {
+                    for (int x = 0; x < width; x++) {
+                        int argb = bufferedImage.getRGB(x, y);
                         nativeImage.setPixel(x, y, argb);
                     }
                 }
 
+                NativeImage finalImage = nativeImage;
                 mc.execute(() -> {
                     try {
                         if (albumArtTexture != null) {
                             albumArtTexture.close();
                         }
                         albumArtId = Identifier.fromNamespaceAndPath(MinecraftMpris.MOD_ID, "albumart");
-                        albumArtTexture = new DynamicTexture(() -> "albumart", nativeImage);
+                        albumArtTexture = new DynamicTexture(() -> "albumart", finalImage);
                         mc.getTextureManager().register(albumArtId, albumArtTexture);
                     } catch (Exception e) {
                         MinecraftMpris.LOGGER.error("Failed to register album art texture", e);
+                        if (finalImage != null) {
+                            finalImage.close();
+                        }
+                        clearAlbumArt(mc);
                     }
                 });
             } catch (Exception e) {
-                MinecraftMpris.LOGGER.error("Failed to load album art", e);
+                MinecraftMpris.LOGGER.error("Failed to load album art from URL: " + url, e);
+                if (nativeImage != null) {
+                    nativeImage.close();
+                }
+                clearAlbumArt(mc);
             }
         }).start();
+    }
+
+    private static void clearAlbumArt(Minecraft mc) {
+        mc.execute(() -> {
+            if (albumArtTexture != null) {
+                albumArtTexture.close();
+                albumArtTexture = null;
+            }
+            albumArtId = null;
+        });
     }
 
     private static String truncateText(Minecraft mc, String text, int maxWidth) {
         if (mc.font.width(text) <= maxWidth) {
             return text;
         }
-        
+
         String ellipsis = "...";
         int ellipsisWidth = mc.font.width(ellipsis);
-        
+
         StringBuilder truncated = new StringBuilder();
         for (int i = 0; i < text.length(); i++) {
             String current = truncated.toString() + text.charAt(i);
@@ -164,10 +189,10 @@ public class MusicOverlay {
             }
             truncated.append(text.charAt(i));
         }
-        
+
         return text;
     }
-    
+
     private static String formatTime(int seconds) {
         int mins = seconds / 60;
         int secs = seconds % 60;
