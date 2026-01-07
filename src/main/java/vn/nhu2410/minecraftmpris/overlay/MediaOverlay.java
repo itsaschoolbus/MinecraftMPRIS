@@ -43,6 +43,7 @@ public class MediaOverlay {
         Minecraft mc = Minecraft.getInstance();
         if (mc == null || mc.player == null) return;
         if (title == null || title.isEmpty() || length <= 0) return;
+        if (mc.options.hideGui || mc.getDebugOverlay().showDebugScreen() || mc.screen != null) return;
 
         // update album art if url changed
         if (artUrl != null && !artUrl.equals(lastArtUrl)) {
