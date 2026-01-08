@@ -121,7 +121,24 @@ public class MediaOverlay {
         new Thread(() -> {
             NativeImage nativeImage = null;
             try {
-                InputStream stream = URI.create(url).toURL().openStream();
+                InputStream stream;
+
+                // handle local players giving data:image/<file extension>;base64,...
+                if (url.startsWith("data:image/")) {
+                    int commaIndex = url.indexOf(',');
+                    if (commaIndex == -1) {
+                        MinecraftMprisClient.LOGGER.warn("Invalid data URI format: " + url);
+                        clearAlbumArt(mc);
+                        return;
+                    }
+
+                    String base64Data = url.substring(commaIndex + 1);
+                    byte[] imageBytes = java.util.Base64.getDecoder().decode(base64Data);
+                    stream = new java.io.ByteArrayInputStream(imageBytes);
+                } else {
+                    stream = URI.create(url).toURL().openStream();
+                }
+
                 BufferedImage bufferedImage = ImageIO.read(stream);
                 stream.close();
 
