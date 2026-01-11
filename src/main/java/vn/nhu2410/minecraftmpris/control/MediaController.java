@@ -48,7 +48,7 @@ public class MediaController {
             try {
                 String[] cmd = {
                     "bash", "-c",
-                    "playerctl " + command.toLowerCase() + " 2>/dev/null"
+                    "playerctl " + command
                 };
 
                 Process process = Runtime.getRuntime().exec(cmd);

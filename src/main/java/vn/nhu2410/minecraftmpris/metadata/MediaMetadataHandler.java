@@ -15,8 +15,8 @@ public class MediaMetadataHandler {
                 String[] cmd = {
                     "bash", "-c",
                     // prefer plasma browser integration if it exists
-                    "playerctl metadata --format " + metadataFormat + " -p plasma-browser-integration 2>/dev/null " +
-                    "|| playerctl metadata --format " + metadataFormat + " 2>/dev/null " +
+                    "playerctl metadata --format " + metadataFormat + " -p plasma-browser-integration " +
+                    "|| playerctl metadata --format " + metadataFormat + " " +
                     "|| echo 'Unknown|Unknown|0|0|Paused|'"
                 };
 
