@@ -3,8 +3,8 @@ package vn.nhu2410.minecraftmpris;
 import net.fabricmc.api.ClientModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vn.nhu2410.minecraftmpris.control.MediaController;
-import vn.nhu2410.minecraftmpris.metadata.MediaMetadataHandler;
+import vn.nhu2410.minecraftmpris.control.MediaControlHandler;
+import vn.nhu2410.minecraftmpris.metadata.MetadataHandler;
 import vn.nhu2410.minecraftmpris.overlay.MediaOverlay;
 
 public class MinecraftMprisClient implements ClientModInitializer {
@@ -13,15 +13,15 @@ public class MinecraftMprisClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        // overlay
-        MediaOverlay.registerMediaOverlay();
-
         // keybindings
-        MediaController.registerKeyBindings();
-        MediaController.handleKeyBindings();
+        MediaControlHandler.registerKeyBindings();
+        MediaControlHandler.handleKeyBindings();
 
         // metadata
-        MediaMetadataHandler.refreshTrackInfo();
+        MetadataHandler.refreshTrackInfo();
+
+        // overlay
+        MediaOverlay.registerMediaOverlay();
 
         LOGGER.info("Control media within Minecraft!");
     }

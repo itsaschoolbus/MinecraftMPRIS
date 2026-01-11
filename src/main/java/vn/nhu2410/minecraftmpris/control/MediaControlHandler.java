@@ -9,7 +9,7 @@ import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 import vn.nhu2410.minecraftmpris.MinecraftMprisClient;
 
-public class MediaController {
+public class MediaControlHandler {
     private static KeyMapping playPauseKey;
     private static KeyMapping nextTrackKey;
     private static KeyMapping prevTrackKey;
@@ -21,26 +21,32 @@ public class MediaController {
             )
         );
 
-        playPauseKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
-            "key.minecraftmpris.playpause",
-            InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_P,
-            MPRIS_BINDS
-        ));
+        playPauseKey = KeyBindingHelper.registerKeyBinding(
+            new KeyMapping(
+                "key.minecraftmpris.playpause",
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_P,
+                MPRIS_BINDS
+            )
+        );
 
-        nextTrackKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
-            "key.minecraftmpris.next",
-            InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_RIGHT_BRACKET,
-            MPRIS_BINDS
-        ));
+        nextTrackKey = KeyBindingHelper.registerKeyBinding(
+            new KeyMapping(
+                "key.minecraftmpris.next",
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_RIGHT_BRACKET,
+                MPRIS_BINDS
+            )
+        );
 
-        prevTrackKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
-            "key.minecraftmpris.previous",
-            InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_LEFT_BRACKET,
-            MPRIS_BINDS
-        ));
+        prevTrackKey = KeyBindingHelper.registerKeyBinding(
+            new KeyMapping(
+                "key.minecraftmpris.previous",
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_LEFT_BRACKET,
+                MPRIS_BINDS
+            )
+        );
     }
 
     private static void executeMediaCommand(String command) {

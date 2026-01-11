@@ -5,9 +5,15 @@ import java.io.InputStreamReader;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
 import vn.nhu2410.minecraftmpris.MinecraftMprisClient;
-import vn.nhu2410.minecraftmpris.overlay.MediaOverlay;
 
-public class MediaMetadataHandler {
+public class MetadataHandler {
+    public static String title = "Unknown Title";
+    public static String artist = "Unknown Artist";
+    public static int position = 0;
+    public static int length = 1;
+    public static boolean playing = false;
+    public static String artUrl = null;
+
     private static void updateTrackInfo() {
         new Thread(() -> {
             try {
@@ -31,27 +37,27 @@ public class MediaMetadataHandler {
                     long lenMicros = Long.parseLong(p[3]);
 
                     Minecraft.getInstance().execute(() -> {
-                        MediaOverlay.title  = p[0];
-                        MediaOverlay.artist = p[1];
+                        title  = p[0];
+                        artist = p[1];
 
                         // fallback for when artist is in title (spotify chromium w/o integration)
-                        if (MediaOverlay.artist == null || MediaOverlay.artist.isEmpty()) {
-                            String t = MediaOverlay.title;
+                        if (artist == null || artist.isEmpty()) {
+                            String t = title;
                             if (t.contains(" • ")) {
                                 String[] parts = t.split(" • ");
-                                MediaOverlay.title = parts[0];
-                                MediaOverlay.artist = parts[1];
+                                title = parts[0];
+                                artist = parts[1];
                             } else {
-                                MediaOverlay.artist = "Unknown Artist";
+                                artist = "Unknown Artist";
                             }
                         }
 
-                        MediaOverlay.position = (int) posSeconds;
-                        MediaOverlay.length = (int) (lenMicros / 1_000_000);
-                        MediaOverlay.playing = p[4].equalsIgnoreCase("Playing");
+                        position = (int) posSeconds;
+                        length = (int) (lenMicros / 1_000_000);
+                        playing = p[4].equalsIgnoreCase("Playing");
 
                         if (p.length > 5 && p[5] != null && !p[5].isEmpty()) {
-                            MediaOverlay.artUrl = p[5];
+                            artUrl = p[5];
                         }
                     });
                 }
