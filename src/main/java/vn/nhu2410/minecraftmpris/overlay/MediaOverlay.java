@@ -1,19 +1,14 @@
 package vn.nhu2410.minecraftmpris.overlay;
 
-import com.mojang.blaze3d.platform.NativeImage;
-import java.awt.image.BufferedImage;
-import java.io.InputStream;
-import java.net.URI;
-import javax.imageio.ImageIO;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
 import vn.nhu2410.minecraftmpris.MinecraftMprisClient;
+import vn.nhu2410.minecraftmpris.metadata.MediaMetadataTransformer;
 
 public class MediaOverlay {
     public static String title = "Unknown Title";
@@ -22,9 +17,7 @@ public class MediaOverlay {
     public static int length = 1;
     public static boolean playing = false;
     public static String artUrl = null;
-    
-    private static DynamicTexture albumArtTexture = null;
-    private static Identifier albumArtId = null;
+
     private static String lastArtUrl = null;
 
     public static void registerMediaOverlay() {
@@ -47,7 +40,7 @@ public class MediaOverlay {
 
         // update album art if url changed
         if (artUrl != null && !artUrl.equals(lastArtUrl)) {
-            loadAlbumArt(mc, artUrl);
+            MediaMetadataTransformer.loadAlbumArt(mc, artUrl);
             lastArtUrl = artUrl;
         }
 
@@ -64,10 +57,10 @@ public class MediaOverlay {
         gui.fill(x, y, x + boxWidth, y + boxHeight, 0x88000000);
 
         // album art
-        if (albumArtTexture != null && albumArtId != null) {
+        if (MediaMetadataTransformer.albumArtTexture != null && MediaMetadataTransformer.albumArtId != null) {
             gui.blit(
                 RenderPipelines.GUI_TEXTURED,
-                albumArtId,
+                MediaMetadataTransformer.albumArtId,
                 x + 5, y + 5,
                 0, 0,
                 albumArtSize, albumArtSize,
@@ -115,85 +108,6 @@ public class MediaOverlay {
         // playing indicator
         String playStatus = playing ? "▶" : "⏸";
         gui.drawString(mc.font, playStatus, x + boxWidth - 15, y + 43, 0xFFFFFFFF, false);
-    }
-
-    private static void loadAlbumArt(Minecraft mc, String url) {
-        new Thread(() -> {
-            NativeImage nativeImage = null;
-            try {
-                InputStream stream;
-
-                // handle local players giving data:image/<file extension>;base64,...
-                if (url.startsWith("data:image/")) {
-                    int commaIndex = url.indexOf(',');
-                    if (commaIndex == -1) {
-                        MinecraftMprisClient.LOGGER.warn("Invalid data URI format: " + url);
-                        clearAlbumArt(mc);
-                        return;
-                    }
-
-                    String base64Data = url.substring(commaIndex + 1);
-                    byte[] imageBytes = java.util.Base64.getDecoder().decode(base64Data);
-                    stream = new java.io.ByteArrayInputStream(imageBytes);
-                } else {
-                    stream = URI.create(url).toURL().openStream();
-                }
-
-                BufferedImage bufferedImage = ImageIO.read(stream);
-                stream.close();
-
-                if (bufferedImage == null) {
-                    MinecraftMprisClient.LOGGER.warn("ImageIO returned null for URL: " + url);
-                    clearAlbumArt(mc);
-                    return;
-                }
-
-                int width = bufferedImage.getWidth();
-                int height = bufferedImage.getHeight();
-                nativeImage = new NativeImage(width, height, true);
-
-                for (int y = 0; y < height; y++) {
-                    for (int x = 0; x < width; x++) {
-                        int argb = bufferedImage.getRGB(x, y);
-                        nativeImage.setPixel(x, y, argb);
-                    }
-                }
-
-                NativeImage finalImage = nativeImage;
-                mc.execute(() -> {
-                    try {
-                        if (albumArtTexture != null) {
-                            albumArtTexture.close();
-                        }
-                        albumArtId = Identifier.fromNamespaceAndPath(MinecraftMprisClient.MOD_ID, "albumart");
-                        albumArtTexture = new DynamicTexture(() -> "albumart", finalImage);
-                        mc.getTextureManager().register(albumArtId, albumArtTexture);
-                    } catch (Exception e) {
-                        MinecraftMprisClient.LOGGER.error("Failed to register album art texture", e);
-                        if (finalImage != null) {
-                            finalImage.close();
-                        }
-                        clearAlbumArt(mc);
-                    }
-                });
-            } catch (Exception e) {
-                MinecraftMprisClient.LOGGER.error("Failed to load album art from URL: " + url, e);
-                if (nativeImage != null) {
-                    nativeImage.close();
-                }
-                clearAlbumArt(mc);
-            }
-        }).start();
-    }
-
-    private static void clearAlbumArt(Minecraft mc) {
-        mc.execute(() -> {
-            if (albumArtTexture != null) {
-                albumArtTexture.close();
-                albumArtTexture = null;
-            }
-            albumArtId = null;
-        });
     }
 
     private static String truncateText(Minecraft mc, String text, int maxWidth) {
