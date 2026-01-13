@@ -3,7 +3,19 @@ plugins {
 	id 'maven-publish'
 }
 
-version = project.mod_version
+def getCommitHash = {
+    try {
+        return 'git rev-parse --short HEAD'.execute(null, rootProject.rootDir).text.trim()
+    } catch (Exception e) {
+        return "unknown"
+    }
+}
+
+def git_commit = getCommitHash()
+def mod_version = project.mod_version
+def mc_version = project.minecraft_version
+
+version = "${mod_version}+mc${minecraft_version}-g${git_commit}"
 group = project.maven_group
 
 base {
