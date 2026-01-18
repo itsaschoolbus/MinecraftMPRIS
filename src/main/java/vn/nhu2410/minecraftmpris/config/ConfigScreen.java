@@ -66,7 +66,7 @@ public class ConfigScreen {
                                 () -> ConfigHandler.HANDLER.instance().overlayWidth,
                                 newVal -> ConfigHandler.HANDLER.instance().overlayWidth = newVal)
                         .controller(opt -> IntegerSliderControllerBuilder.create(opt)
-                                .range(50, 300)
+                                .range(70, 270)
                                 .step(1))
                         .build())
                 .option(Option.<Integer>createBuilder()
@@ -76,7 +76,7 @@ public class ConfigScreen {
                                 () -> ConfigHandler.HANDLER.instance().overlayHeight,
                                 newVal -> ConfigHandler.HANDLER.instance().overlayHeight = newVal)
                         .controller(opt -> IntegerSliderControllerBuilder.create(opt)
-                                .range(0, 110)
+                                .range(15, 100)
                                 .step(1))
                         .build())
                 .build())
@@ -89,7 +89,7 @@ public class ConfigScreen {
                                 () -> ConfigHandler.HANDLER.instance().albumArtSize,
                                 newVal -> ConfigHandler.HANDLER.instance().albumArtSize = newVal)
                         .controller(opt -> IntegerSliderControllerBuilder.create(opt)
-                                .range(0, 100)
+                                .range(5, 90)
                                 .step(1))
                         .build())
                 .option(Option.<Boolean>createBuilder()
