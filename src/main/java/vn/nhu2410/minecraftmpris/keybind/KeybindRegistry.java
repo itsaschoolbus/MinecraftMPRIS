@@ -1,58 +1,50 @@
 package vn.nhu2410.minecraftmpris.keybind;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.KeyMapping;
-import net.minecraft.resources.Identifier;
+import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
-import vn.nhu2410.minecraftmpris.MinecraftMprisClient;
 
 public class KeybindRegistry {
-    public static KeyMapping playPauseKey;
-    public static KeyMapping nextTrackKey;
-    public static KeyMapping prevTrackKey;
-    public static KeyMapping configKey;
+    public static KeyBinding playPauseKey;
+    public static KeyBinding nextTrackKey;
+    public static KeyBinding prevTrackKey;
+    public static KeyBinding configKey;
 
     public static void registerKeybinds() {
-        final KeyMapping.Category MPRIS_BINDS = new KeyMapping.Category(
-            Identifier.fromNamespaceAndPath(
-                MinecraftMprisClient.MOD_ID, "controls"
-            )
-        );
-
         playPauseKey = KeyBindingHelper.registerKeyBinding(
-            new KeyMapping(
+            new KeyBinding(
                 "minecraftmpris.key.playpause",
-                InputConstants.Type.KEYSYM,
+                InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_P,
-                MPRIS_BINDS
+                "key.category.minecraftmpris.controls"
             )
         );
 
         nextTrackKey = KeyBindingHelper.registerKeyBinding(
-            new KeyMapping(
+            new KeyBinding(
                 "minecraftmpris.key.next",
-                InputConstants.Type.KEYSYM,
+                InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_RIGHT_BRACKET,
-                MPRIS_BINDS
+                "key.category.minecraftmpris.controls"
             )
         );
 
         prevTrackKey = KeyBindingHelper.registerKeyBinding(
-            new KeyMapping(
+            new KeyBinding(
                 "minecraftmpris.key.previous",
-                InputConstants.Type.KEYSYM,
+                InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_LEFT_BRACKET,
-                MPRIS_BINDS
+                "key.category.minecraftmpris.controls"
             )
         );
 
         configKey = KeyBindingHelper.registerKeyBinding(
-            new KeyMapping(
+            new KeyBinding(
                 "minecraftmpris.key.config",
-                InputConstants.Type.KEYSYM,
+                InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_BACKSLASH,
-                MPRIS_BINDS
+                "key.category.minecraftmpris.controls"
             )
         );
     }

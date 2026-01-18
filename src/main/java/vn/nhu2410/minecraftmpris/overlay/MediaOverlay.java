@@ -1,8 +1,7 @@
 package vn.nhu2410.minecraftmpris.overlay;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import vn.nhu2410.minecraftmpris.config.ConfigHandler;
 import vn.nhu2410.minecraftmpris.metadata.MetadataHandler;
 import vn.nhu2410.minecraftmpris.metadata.MetadataTransformer;
@@ -10,7 +9,7 @@ import vn.nhu2410.minecraftmpris.metadata.MetadataTransformer;
 public class MediaOverlay {
     private String lastArtUrl = null;
 
-    public void renderMediaOverlay(GuiGraphics gui, Minecraft mc) {
+    public void renderMediaOverlay(DrawContext context, MinecraftClient mc) {
         if (MetadataHandler.title == null ||
             MetadataHandler.title.isEmpty() ||
             MetadataHandler.length <= 0
@@ -23,8 +22,8 @@ public class MediaOverlay {
             MetadataTransformer.clearAlbumArt(mc);
         }
 
-        int width = mc.getWindow().getGuiScaledWidth();
-        int height = mc.getWindow().getGuiScaledHeight();
+        int width = mc.getWindow().getScaledWidth();
+        int height = mc.getWindow().getScaledHeight();
         int x = OverlayAreaHandler.getRealX(width);
         int y = OverlayAreaHandler.getRealY(height);
 
@@ -32,7 +31,7 @@ public class MediaOverlay {
         int realOverlayHeight = OverlayAreaHandler.getRealOverlayHeight();
 
         if (ConfigHandler.HANDLER.instance().showBackground) {
-            gui.fill(x, y, x + realOverlayWidth, y + realOverlayHeight, 0x88000000);
+            context.fill(x, y, x + realOverlayWidth, y + realOverlayHeight, 0x88000000);
         }
 
         if (ConfigHandler.HANDLER.instance().showAlbumArt) {
@@ -40,8 +39,7 @@ public class MediaOverlay {
             int albumArtY = OverlayAreaHandler.getAlbumArtY(y);
 
             if (MetadataTransformer.albumArtTexture != null && MetadataTransformer.albumArtId != null) {
-                gui.blit(
-                    RenderPipelines.GUI_TEXTURED,
+                context.drawTexture(
                     MetadataTransformer.albumArtId,
                     albumArtX, albumArtY,
                     0, 0,
@@ -51,7 +49,7 @@ public class MediaOverlay {
                     ConfigHandler.HANDLER.instance().albumArtSize
                 );
             } else {
-                gui.fill(albumArtX, albumArtY,
+                context.fill(albumArtX, albumArtY,
                     albumArtX + ConfigHandler.HANDLER.instance().albumArtSize,
                     albumArtY + ConfigHandler.HANDLER.instance().albumArtSize,
                     0xFF333333
@@ -63,10 +61,10 @@ public class MediaOverlay {
         int textWidth = OverlayAreaHandler.getTextWidth(x, realOverlayWidth);
         String title = truncateText(mc, MetadataHandler.title, textWidth);;
         String artist = truncateText(mc, MetadataHandler.artist, textWidth);
-        gui.drawString(mc.font, title, textX, y + OverlayAreaHandler.getTitleY(), 0xFFFFFFFF, ConfigHandler.HANDLER.instance().showTextShadow);
+        context.drawText(mc.textRenderer, title, textX, y + OverlayAreaHandler.getTitleY(), 0xFFFFFFFF, ConfigHandler.HANDLER.instance().showTextShadow);
 
         if (ConfigHandler.HANDLER.instance().showArtist) {
-            gui.drawString(mc.font, artist, textX, y + OverlayAreaHandler.getArtistY(), 0xFFAAAAAA, ConfigHandler.HANDLER.instance().showTextShadow);
+            context.drawText(mc.textRenderer, artist, textX, y + OverlayAreaHandler.getArtistY(), 0xFFAAAAAA, ConfigHandler.HANDLER.instance().showTextShadow);
         }
 
         if (ConfigHandler.HANDLER.instance().showProgressBar) {
@@ -85,37 +83,37 @@ public class MediaOverlay {
             int filled = (int) (barWidth * progress);
 
             int barHeight = OverlayAreaHandler.PROGRESS_BAR_HEIGHT;
-            gui.fill(barStart, barY, barEnd, barY + barHeight, 0xFF333333);
+            context.fill(barStart, barY, barEnd, barY + barHeight, 0xFF333333);
             if (filled > 0) {
-                gui.fill(barStart, barY, barStart + filled, barY + barHeight, 0xFFFFFFFF);
+                context.fill(barStart, barY, barStart + filled, barY + barHeight, 0xFFFFFFFF);
             }
         }
 
         int timeY = y + OverlayAreaHandler.getTimeY();
         if (ConfigHandler.HANDLER.instance().showCurrentTime) {
             String timeStr = formatTime(MetadataHandler.position) + " / " + formatTime(MetadataHandler.length);
-            gui.drawString(mc.font, timeStr, textX, timeY, 0xFFCCCCCC, ConfigHandler.HANDLER.instance().showTextShadow);
+            context.drawText(mc.textRenderer, timeStr, textX, timeY, 0xFFCCCCCC, ConfigHandler.HANDLER.instance().showTextShadow);
         }
 
         if (ConfigHandler.HANDLER.instance().showPlayingIndicator) {
             String playStatus = MetadataHandler.playing ? "▶" : "⏸";
             int indicatorX = x + realOverlayWidth - 15;
-            gui.drawString(mc.font, playStatus, indicatorX, timeY, 0xFFFFFFFF, ConfigHandler.HANDLER.instance().showTextShadow);
+            context.drawText(mc.textRenderer, playStatus, indicatorX, timeY, 0xFFFFFFFF, ConfigHandler.HANDLER.instance().showTextShadow);
         }
     }
 
-    private static String truncateText(Minecraft mc, String text, int maxWidth) {
-        if (mc.font.width(text) <= maxWidth) {
+    private static String truncateText(MinecraftClient mc, String text, int maxWidth) {
+        if (mc.textRenderer.getWidth(text) <= maxWidth) {
             return text;
         }
 
         String ellipsis = "...";
-        int ellipsisWidth = mc.font.width(ellipsis);
+        int ellipsisWidth = mc.textRenderer.getWidth(ellipsis);
 
         StringBuilder truncated = new StringBuilder();
         for (int i = 0; i < text.length(); i++) {
             String current = truncated.toString() + text.charAt(i);
-            if (mc.font.width(current) + ellipsisWidth > maxWidth) {
+            if (mc.textRenderer.getWidth(current) + ellipsisWidth > maxWidth) {
                 return truncated.toString() + ellipsis;
             }
             truncated.append(text.charAt(i));

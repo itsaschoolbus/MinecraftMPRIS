@@ -1,7 +1,7 @@
 package vn.nhu2410.minecraftmpris.control;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.network.chat.Component;
+import net.minecraft.text.Text;
 import vn.nhu2410.minecraftmpris.MinecraftMprisClient;
 import vn.nhu2410.minecraftmpris.keybind.KeybindRegistry;
 
@@ -26,39 +26,39 @@ public class MediaControl {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player == null) return;
 
-            while (KeybindRegistry.playPauseKey.consumeClick()) {
+            while (KeybindRegistry.playPauseKey.wasPressed()) {
                 executeMediaCommand("play-pause");
-                client.player.displayClientMessage(
-                    Component.translatable(
+                client.player.sendMessage(
+                    Text.translatable(
                         "minecraftmpris.ingamemsg.prefix"
                     ).append(
-                        Component.translatable(
+                        Text.translatable(
                             "minecraftmpris.ingamemsg.playpause"
                         )
                     ), true
                 );
             }
 
-            while (KeybindRegistry.nextTrackKey.consumeClick()) {
+            while (KeybindRegistry.nextTrackKey.wasPressed()) {
                 executeMediaCommand("next");
-                client.player.displayClientMessage(
-                    Component.translatable(
+                client.player.sendMessage(
+                    Text.translatable(
                         "minecraftmpris.ingamemsg.prefix"
                     ).append(
-                        Component.translatable(
+                        Text.translatable(
                             "minecraftmpris.ingamemsg.next"
                         )
                     ), true
                 );
             }
 
-            while (KeybindRegistry.prevTrackKey.consumeClick()) {
+            while (KeybindRegistry.prevTrackKey.wasPressed()) {
                 executeMediaCommand("previous");
-                client.player.displayClientMessage(
-                    Component.translatable(
+                client.player.sendMessage(
+                    Text.translatable(
                         "minecraftmpris.ingamemsg.prefix"
                     ).append(
-                        Component.translatable(
+                        Text.translatable(
                             "minecraftmpris.ingamemsg.previous"
                         )
                     ), true

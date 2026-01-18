@@ -1,6 +1,5 @@
 package vn.nhu2410.minecraftmpris.metadata;
 
-import com.mojang.blaze3d.platform.NativeImage;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -8,16 +7,17 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Base64;
 import javax.imageio.ImageIO;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.resources.Identifier;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.texture.NativeImage;
+import net.minecraft.client.texture.NativeImageBackedTexture;
+import net.minecraft.util.Identifier;
 import vn.nhu2410.minecraftmpris.MinecraftMprisClient;
 
 public class MetadataTransformer {
-    public static DynamicTexture albumArtTexture = null;
+    public static NativeImageBackedTexture albumArtTexture = null;
     public static Identifier albumArtId = null;
 
-    public static void loadAlbumArt(Minecraft mc, String url) {
+    public static void loadAlbumArt(MinecraftClient mc, String url) {
         new Thread(() -> {
             NativeImage nativeImage = null;
             try {
@@ -63,11 +63,11 @@ public class MetadataTransformer {
                             albumArtTexture.close();
                         }
                         if (albumArtId != null) {
-                            mc.getTextureManager().release(albumArtId);
+                            mc.getTextureManager().destroyTexture(albumArtId);
                         }
-                        albumArtId = Identifier.fromNamespaceAndPath(MinecraftMprisClient.MOD_ID, "album_art");
-                        albumArtTexture = new DynamicTexture(() -> "album_art", finalImage);
-                        mc.getTextureManager().register(albumArtId, albumArtTexture);
+                        albumArtId = new Identifier(MinecraftMprisClient.MOD_ID, "album_art");
+                        albumArtTexture = new NativeImageBackedTexture(finalImage);
+                        mc.getTextureManager().registerTexture(albumArtId, albumArtTexture);
                     } catch (Exception e) {
                         MinecraftMprisClient.LOGGER.error("Failed to register album art texture", e);
                         if (finalImage != null) {
@@ -86,14 +86,14 @@ public class MetadataTransformer {
         }).start();
     }
 
-    public static void clearAlbumArt(Minecraft mc) {
+    public static void clearAlbumArt(MinecraftClient mc) {
         mc.execute(() -> {
             if (albumArtTexture != null) {
                 albumArtTexture.close();
                 albumArtTexture = null;
             }
             if (albumArtId != null) {
-                mc.getTextureManager().release(albumArtId);
+                mc.getTextureManager().destroyTexture(albumArtId);
                 albumArtId = null;
             }
         });

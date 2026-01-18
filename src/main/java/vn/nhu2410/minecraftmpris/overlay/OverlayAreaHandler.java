@@ -1,6 +1,6 @@
 package vn.nhu2410.minecraftmpris.overlay;
 
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
 import vn.nhu2410.minecraftmpris.config.ConfigHandler;
 
 public class OverlayAreaHandler {
@@ -9,7 +9,7 @@ public class OverlayAreaHandler {
     public static final int PROGRESS_BAR_HEIGHT = 4;
 
     private static int getTextHeight() {
-        return Minecraft.getInstance().font.lineHeight;
+        return MinecraftClient.getInstance().textRenderer.fontHeight;
     }
 
     public static int getRealOverlayWidth() {

@@ -2,8 +2,7 @@ package vn.nhu2410.minecraftmpris.metadata;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.Util;
+import net.minecraft.client.MinecraftClient;
 import vn.nhu2410.minecraftmpris.MinecraftMprisClient;
 
 public class MetadataHandler {
@@ -41,7 +40,7 @@ public class MetadataHandler {
                     float posSeconds = Float.parseFloat(p[2]) / 1_000_000f;
                     long lenMicros = Long.parseLong(p[3]);
 
-                    Minecraft.getInstance().execute(() -> {
+                    MinecraftClient.getInstance().execute(() -> {
                         title  = p[0];
                         artist = p[1];
 
@@ -75,16 +74,16 @@ public class MetadataHandler {
         }).start();
     }
 
-    public static void refreshMediaInfo(Minecraft mc) {
+    public static void refreshMediaInfo(MinecraftClient mc) {
         if (mc == null ||
             mc.player == null ||
-            mc.options.hideGui ||
-            mc.getDebugOverlay().showDebugScreen() ||
-            mc.screen != null) {
+            mc.options.hudHidden ||
+            mc.options.debugEnabled ||
+            mc.currentScreen != null) {
             return;
         }
 
-        long currentTime = Util.getMillis();
+        long currentTime = System.currentTimeMillis();
         if (!isUpdating && currentTime - lastUpdateTime >= UPDATE_INTERVAL_MS) {
             updateMediaInfo();
             lastUpdateTime = currentTime;

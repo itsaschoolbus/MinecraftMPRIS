@@ -6,14 +6,14 @@ import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.Minecraft;
-import net.minecraft.resources.Identifier;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.Identifier;
 import vn.nhu2410.minecraftmpris.MinecraftMprisClient;
 import vn.nhu2410.minecraftmpris.keybind.KeybindRegistry;
 
 public class ConfigHandler {
     public static ConfigClassHandler<ConfigOptions> HANDLER = ConfigClassHandler.createBuilder(ConfigHandler.ConfigOptions.class)
-            .id(Identifier.fromNamespaceAndPath(MinecraftMprisClient.MOD_ID, "config"))
+            .id(new Identifier(MinecraftMprisClient.MOD_ID, "config"))
             .serializer(config -> GsonConfigSerializerBuilder.create(config)
                     .setPath(FabricLoader.getInstance().getConfigDir().resolve("minecraftmpris.json5"))
                     .appendGsonBuilder(GsonBuilder::setPrettyPrinting)
@@ -83,8 +83,8 @@ public class ConfigHandler {
 
     public static void handleKeybinds() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (KeybindRegistry.configKey.consumeClick() && client.screen == null) {
-                client.setScreen(ConfigScreen.configScreen(Minecraft.getInstance().screen));
+            if (KeybindRegistry.configKey.wasPressed() && client.currentScreen == null) {
+                client.setScreen(ConfigScreen.configScreen(MinecraftClient.getInstance().currentScreen));
             }
         });
     }
