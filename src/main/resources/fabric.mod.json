@@ -23,6 +23,9 @@
 	"entrypoints": {
 		"client": [
 			"vn.nhu2410.minecraftmpris.MinecraftMprisClient"
+		],
+		"modmenu": [
+			"vn.nhu2410.minecraftmpris.config.ModMenuEntry"
 		]
 	},
 	"depends": {
