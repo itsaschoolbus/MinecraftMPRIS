@@ -2,8 +2,8 @@ package vn.nhu2410.minecraftmpris.metadata;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.Util;
 import vn.nhu2410.minecraftmpris.MinecraftMprisClient;
 
 public class MetadataHandler {
@@ -14,7 +14,12 @@ public class MetadataHandler {
     public static boolean playing = false;
     public static String artUrl = null;
 
-    private static void updateTrackInfo() {
+    private static long lastUpdateTime;
+    private static final long UPDATE_INTERVAL_MS = 1000;
+    private static volatile boolean isUpdating = false;
+
+    private static void updateMediaInfo() {
+        isUpdating = true;
         new Thread(() -> {
             try {
                 String metadataFormat = "'{{title}}|{{artist}}|{{position}}|{{mpris:length}}|{{status}}|{{mpris:artUrl}}'";
@@ -63,17 +68,26 @@ public class MetadataHandler {
                 }
                 process.waitFor();
             } catch (Exception e) {
-                MinecraftMprisClient.LOGGER.error("Failed to read metadata", e);
+                MinecraftMprisClient.LOGGER.error("Failed to update metadata", e);
+            } finally {
+                isUpdating = false;
             }
         }).start();
     }
 
-    public static void refreshTrackInfo() {
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            // update metadata every 20 ticks (1 sec)
-            if (client.level != null && client.level.getGameTime() % 20 == 0) {
-                updateTrackInfo();
-            }
-        });
+    public static void refreshMediaInfo(Minecraft mc) {
+        if (mc == null ||
+            mc.player == null ||
+            mc.options.hideGui ||
+            mc.getDebugOverlay().showDebugScreen() ||
+            mc.screen != null) {
+            return;
+        }
+
+        long currentTime = Util.getMillis();
+        if (!isUpdating && currentTime - lastUpdateTime >= UPDATE_INTERVAL_MS) {
+            updateMediaInfo();
+            lastUpdateTime = currentTime;
+        }
     }
 }

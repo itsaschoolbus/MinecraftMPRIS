@@ -2,8 +2,11 @@ package vn.nhu2410.minecraftmpris.metadata;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Base64;
 import javax.imageio.ImageIO;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -30,8 +33,8 @@ public class MetadataTransformer {
                     }
 
                     String base64Data = url.substring(commaIndex + 1);
-                    byte[] imageBytes = java.util.Base64.getDecoder().decode(base64Data);
-                    stream = new java.io.ByteArrayInputStream(imageBytes);
+                    byte[] imageBytes = Base64.getDecoder().decode(base64Data);
+                    stream = new ByteArrayInputStream(imageBytes);
                 } else {
                     stream = URI.create(url).toURL().openStream();
                 }
@@ -45,27 +48,25 @@ public class MetadataTransformer {
                     return;
                 }
 
-                int width = bufferedImage.getWidth();
-                int height = bufferedImage.getHeight();
-                nativeImage = new NativeImage(width, height, true);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ImageIO.write(bufferedImage, "png", baos);
+                byte[] pngBytes = baos.toByteArray();
+                baos.close();
+                bufferedImage.flush();
 
-                for (int y = 0; y < height; y++) {
-                    for (int x = 0; x < width; x++) {
-                        int argb = bufferedImage.getRGB(x, y);
-                        nativeImage.setPixel(x, y, argb);
-                    }
-                }
-
+                nativeImage = NativeImage.read(new ByteArrayInputStream(pngBytes));
                 NativeImage finalImage = nativeImage;
+
                 mc.execute(() -> {
                     try {
                         if (albumArtTexture != null) {
                             albumArtTexture.close();
                         }
-                        albumArtId = Identifier.fromNamespaceAndPath(
-                            MinecraftMprisClient.MOD_ID, "albumart"
-                        );
-                        albumArtTexture = new DynamicTexture(() -> "albumart", finalImage);
+                        if (albumArtId != null) {
+                            mc.getTextureManager().release(albumArtId);
+                        }
+                        albumArtId = Identifier.fromNamespaceAndPath(MinecraftMprisClient.MOD_ID, "album_art");
+                        albumArtTexture = new DynamicTexture(() -> "album_art", finalImage);
                         mc.getTextureManager().register(albumArtId, albumArtTexture);
                     } catch (Exception e) {
                         MinecraftMprisClient.LOGGER.error("Failed to register album art texture", e);
@@ -85,13 +86,16 @@ public class MetadataTransformer {
         }).start();
     }
 
-    private static void clearAlbumArt(Minecraft mc) {
+    public static void clearAlbumArt(Minecraft mc) {
         mc.execute(() -> {
             if (albumArtTexture != null) {
                 albumArtTexture.close();
                 albumArtTexture = null;
             }
-            albumArtId = null;
+            if (albumArtId != null) {
+                mc.getTextureManager().release(albumArtId);
+                albumArtId = null;
+            }
         });
     }
 }

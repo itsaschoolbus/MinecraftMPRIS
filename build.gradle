@@ -3,16 +3,16 @@ plugins {
 }
 
 def getCommitHash = {
-    try {
-        return ['git', 'describe', '--always', '--dirty', '--exclude', '*'].execute().text.trim()
-    } catch (Exception) {
-        return "unknown"
-    }
+	try {
+		return ['git', 'describe', '--always', '--dirty', '--exclude', '*'].execute().text.trim()
+	} catch (Exception) {
+		return "unknown"
+	}
 }
 
 def git_commit = getCommitHash()
 
-version = "${mod_version}+mc${minecraft_version}-g${git_commit}"
+version = "${mod_version}+mc${minecraft_version}-${git_commit}"
 group = project.maven_group
 
 base {
@@ -22,11 +22,15 @@ base {
 repositories {
 	maven {
 		name = "Fabric"
-		url = "https://maven.fabricmc.net/"
+		url = "https://maven.fabricmc.net"
 	}
 	maven {
-		name = 'ParchmentMC'
-		url = 'https://maven.parchmentmc.org'
+		name = "ParchmentMC"
+		url = "https://maven.parchmentmc.org"
+	}
+	maven {
+		name = "Xander Maven"
+		url = "https://maven.isxander.dev/releases"
 	}
 	mavenCentral()
 }
@@ -47,6 +51,7 @@ dependencies {
 	}
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	modImplementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
 }
 
 processResources {
@@ -72,7 +77,10 @@ java {
 }
 
 jar {
-	from("LICENSE") {
+	from("COPYING") {
+		rename { "${it}_${base.archivesName.get()}"}
+	}
+	from("COPYING.LESSER") {
 		rename { "${it}_${base.archivesName.get()}"}
 	}
 }

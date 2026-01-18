@@ -2,11 +2,15 @@ pluginManagement {
 	repositories {
 		maven {
 			name = 'Fabric'
-			url = 'https://maven.fabricmc.net/'
+			url = 'https://maven.fabricmc.net'
 		}
 		maven {
 			name = 'ParchmentMC'
 			url = 'https://maven.parchmentmc.org'
+		}
+		maven {
+			name = 'Xander Maven'
+			url = 'https://maven.isxander.dev/releases'
 		}
 		mavenCentral()
 		gradlePluginPortal()

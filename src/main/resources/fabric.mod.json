@@ -3,7 +3,7 @@
 	"id": "minecraftmpris",
 	"version": "${version}",
 	"name": "MinecraftMPRIS",
-	"description": "Control media within Minecraft, with MPRIS",
+	"description": "Display and control media within Minecraft, with MPRIS.",
 	"authors" : [
 		{
 			"name" : "Nhu (itsaschoolbus)",
@@ -21,14 +21,15 @@
 	"icon": "assets/minecraftmpris/icon.png",
 	"environment": "client",
 	"entrypoints": {
-    	"client": [
-      		"vn.nhu2410.minecraftmpris.MinecraftMprisClient"
-    	]
-  	},
+		"client": [
+			"vn.nhu2410.minecraftmpris.MinecraftMprisClient"
+		]
+	},
 	"depends": {
 		"fabricloader": ">=0.18.4",
 		"minecraft": "~1.21.11",
 		"java": ">=21",
-		"fabric-api": "*"
+		"fabric-api": "*",
+		"yet_another_config_lib_v3": ">=3.8.1"
 	}
 }
