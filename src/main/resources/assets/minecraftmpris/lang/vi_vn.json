@@ -3,11 +3,13 @@
   "minecraftmpris.key.playpause": "Phát/Tạm dừng nhạc",
   "minecraftmpris.key.next": "Bài tiếp theo",
   "minecraftmpris.key.previous": "Bài trước",
-  "minecraftmpris.key.config": "Mở cấu hình",
+  "minecraftmpris.key.config": "Mở cài đặt",
+
   "minecraftmpris.ingamemsg.prefix": "§6Nhạc: §f",
   "minecraftmpris.ingamemsg.playpause": "Phát/Tạm dừng",
   "minecraftmpris.ingamemsg.next": "Bài tiếp theo",
   "minecraftmpris.ingamemsg.previous": "Bài trước",
+
   "minecraftmpris.config.title": "Tùy chỉnh MinecraftMPRIS",
   "minecraftmpris.config.category.position": "Vị trí",
   "minecraftmpris.config.option.x_offset": "Độ lệch ngang",
@@ -20,6 +22,7 @@
   "minecraftmpris.config.anchor.top_right": "Góc trên, bên phải",
   "minecraftmpris.config.anchor.bottom_left": "Góc dưới, bên trái",
   "minecraftmpris.config.anchor.bottom_right": "Góc dưới, bên phải",
+
   "minecraftmpris.config.category.visual": "Giao diện",
   "minecraftmpris.config.option.show_background": "Hiện nền",
   "minecraftmpris.config.description.show_background": "Có hiển thị nền phía sau hay không.",
@@ -27,6 +30,7 @@
   "minecraftmpris.config.description.overlay_width": "Chiều rộng của overlay (không bao gồm ảnh bìa).",
   "minecraftmpris.config.option.overlay_height": "Chiều cao overlay",
   "minecraftmpris.config.description.overlay_height": "Chiều cao của overlay.",
+
   "minecraftmpris.config.category.content": "Nội dung",
   "minecraftmpris.config.option.album_art_size": "Kích thước ảnh bìa",
   "minecraftmpris.config.description.album_art_size": "Kích thước ảnh bìa (khuyến nghị: chiều cao - 10).",
@@ -41,5 +45,9 @@
   "minecraftmpris.config.option.show_progress_bar": "Hiện thanh tiến trình",
   "minecraftmpris.config.description.show_progress_bar": "Có hiển thị thanh tiến trình hay không.",
   "minecraftmpris.config.option.show_text_shadow": "Hiện bóng",
-  "minecraftmpris.config.description.show_text_shadow": "Có hiển thị bóng phía sau chữ hay không."
+  "minecraftmpris.config.description.show_text_shadow": "Có hiển thị bóng phía sau chữ hay không.",
+
+  "minecraftmpris.config.category.behavior": "Hành vi",
+  "minecraftmpris.config.option.plasma_browser_integration": "Dùng Plasma Browser Integration",
+  "minecraftmpris.config.description.plasma_browser_integration": "Dùng dữ liệu từ Plasma Browser Integration nếu có.\nKhuyến nghị nếu dùng trình duyệt web để phát nhạc vì nó cho dữ liệu tốt hơn."
 }
