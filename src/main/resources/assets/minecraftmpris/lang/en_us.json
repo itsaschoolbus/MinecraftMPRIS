@@ -4,10 +4,12 @@
   "minecraftmpris.key.next": "Next Track",
   "minecraftmpris.key.previous": "Previous Track",
   "minecraftmpris.key.config": "Open Config",
+
   "minecraftmpris.ingamemsg.prefix": "§6Music: §f",
   "minecraftmpris.ingamemsg.playpause": "Play/Pause",
   "minecraftmpris.ingamemsg.next": "Next Track",
   "minecraftmpris.ingamemsg.previous": "Previous Track",
+
   "minecraftmpris.config.title": "Configure MinecraftMPRIS",
   "minecraftmpris.config.category.position": "Position",
   "minecraftmpris.config.option.x_offset": "Width Offset",
@@ -20,6 +22,7 @@
   "minecraftmpris.config.anchor.top_right": "Top Right",
   "minecraftmpris.config.anchor.bottom_left": "Bottom Left",
   "minecraftmpris.config.anchor.bottom_right": "Bottom Right",
+
   "minecraftmpris.config.category.visual": "Appearance",
   "minecraftmpris.config.option.show_background": "Show Background",
   "minecraftmpris.config.description.show_background": "Whether to show a background behind the overlay.",
@@ -27,6 +30,7 @@
   "minecraftmpris.config.description.overlay_width": "Width of the overlay (excluding album art).",
   "minecraftmpris.config.option.overlay_height": "Overlay Height",
   "minecraftmpris.config.description.overlay_height": "Height of the overlay.",
+
   "minecraftmpris.config.category.content": "Content",
   "minecraftmpris.config.option.album_art_size": "Album Art Size",
   "minecraftmpris.config.description.album_art_size": "Size of the album art (recommended: height - 10).",
@@ -41,5 +45,9 @@
   "minecraftmpris.config.option.show_progress_bar": "Show Progress Bar",
   "minecraftmpris.config.description.show_progress_bar": "Whether to show the progress bar.",
   "minecraftmpris.config.option.show_text_shadow": "Show Text Shadow",
-  "minecraftmpris.config.description.show_text_shadow": "Whether to show shadow behind text."
+  "minecraftmpris.config.description.show_text_shadow": "Whether to show shadow behind text.",
+
+  "minecraftmpris.config.category.behavior": "Behavior",
+  "minecraftmpris.config.option.plasma_browser_integration": "Use Plasma Browser Integration",
+  "minecraftmpris.config.description.plasma_browser_integration": "Whether to fetch metadata from Plasma Browser Integration if it exists.\nRecommended if you plan on playing media from web browsers as this will give better metadata."
 }

@@ -58,6 +58,10 @@ public class ConfigHandler {
         public boolean showProgressBar = DefaultConfigOptions.showProgressBar;
         @SerialEntry
         public boolean showTextShadow = DefaultConfigOptions.showTextShadow;
+
+        // behavior
+        @SerialEntry
+        public boolean usePlasmaBrowserIntegration = DefaultConfigOptions.usePlasmaBrowserIntegration;
     }
 
     public static class DefaultConfigOptions {
@@ -79,6 +83,9 @@ public class ConfigHandler {
         public static final boolean showPlayingIndicator = true;
         public static final boolean showProgressBar = true;
         public static final boolean showTextShadow = true;
+
+        // behavior
+        public static final boolean usePlasmaBrowserIntegration = true;
     }
 
     public static void handleKeybinds() {

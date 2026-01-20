@@ -4,14 +4,15 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import net.minecraft.client.MinecraftClient;
 import vn.nhu2410.minecraftmpris.MinecraftMprisClient;
+import vn.nhu2410.minecraftmpris.config.ConfigHandler;
 
 public class MetadataHandler {
-    public static String title = "Unknown Title";
-    public static String artist = "Unknown Artist";
-    public static int position = 0;
-    public static int length = 1;
-    public static boolean playing = false;
-    public static String artUrl = null;
+    public static String title;
+    public static String artist;
+    public static int position;
+    public static int length;
+    public static boolean playing;
+    public static String artUrl;
 
     private static long lastUpdateTime;
     private static final long UPDATE_INTERVAL_MS = 1000;
@@ -21,49 +22,36 @@ public class MetadataHandler {
         isUpdating = true;
         new Thread(() -> {
             try {
-                String metadataFormat = "'{{title}}|{{artist}}|{{position}}|{{mpris:length}}|{{status}}|{{mpris:artUrl}}'";
-                String[] cmd = {
-                    "bash", "-c",
-                    // prefer plasma browser integration if it exists
-                    "playerctl metadata --format " + metadataFormat + " -p plasma-browser-integration " +
-                    "|| playerctl metadata --format " + metadataFormat + " " +
-                    "|| echo 'Unknown|Unknown|0|0|Paused|'"
-                };
+                String baseCommand = "playerctl metadata --format '{{title}}|{{artist}}|{{position}}|{{mpris:length}}|{{status}}|{{mpris:artUrl}}'";
+                String fullCommand = (ConfigHandler.HANDLER.instance().usePlasmaBrowserIntegration
+                    ? baseCommand + " -p plasma-browser-integration || " : "")
+                    + baseCommand + " || echo 'Unknown|Unknown|0|0|Paused|'";
+                String[] cmd = {"sh", "-c", fullCommand};
 
                 Process process = Runtime.getRuntime().exec(cmd);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
                 String line = reader.readLine();
 
                 if (line != null && !line.isEmpty()) {
-                    String[] p = line.split("\\|");
+                    String[] p = line.split("\\|", -1);
 
-                    float posSeconds = Float.parseFloat(p[2]) / 1_000_000f;
-                    long lenMicros = Long.parseLong(p[3]);
+                    if (p.length >= 5) {
+                        String newTitle = p[0].isEmpty() ? "Unknown Title" : p[0];
+                        String newArtist = p[1].isEmpty() ? "Unknown Artist" : p[1];
+                        long posMicros = Long.parseLong(p[2].isEmpty() ? "0" : p[2]);
+                        long lenMicros = Long.parseLong(p[3].isEmpty() ? "0" : p[3]);
+                        boolean isPlaying = p[4].equalsIgnoreCase("Playing");
+                        String newArtUrl = (p.length > 5 && !p[5].isEmpty()) ? p[5] : null;
 
-                    MinecraftClient.getInstance().execute(() -> {
-                        title  = p[0];
-                        artist = p[1];
-
-                        // fallback for when artist is in title (spotify chromium w/o integration)
-                        if (artist == null || artist.isEmpty()) {
-                            String t = title;
-                            if (t.contains(" • ")) {
-                                String[] parts = t.split(" • ");
-                                title = parts[0];
-                                artist = parts[1];
-                            } else {
-                                artist = "Unknown Artist";
-                            }
-                        }
-
-                        position = (int) posSeconds;
-                        length = (int) (lenMicros / 1_000_000);
-                        playing = p[4].equalsIgnoreCase("Playing");
-
-                        if (p.length > 5 && p[5] != null && !p[5].isEmpty()) {
-                            artUrl = p[5];
-                        }
-                    });
+                        MinecraftClient.getInstance().execute(() -> {
+                            title = newTitle;
+                            artist = newArtist;
+                            position = (int) (posMicros / 1_000_000);
+                            length = (int) (lenMicros / 1_000_000);
+                            playing = isPlaying;
+                            artUrl = newArtUrl;
+                        });
+                    }
                 }
                 process.waitFor();
             } catch (Exception e) {
@@ -71,7 +59,7 @@ public class MetadataHandler {
             } finally {
                 isUpdating = false;
             }
-        }).start();
+        }, "MinecraftMPRIS-Metadata").start();
     }
 
     public static void refreshMediaInfo(MinecraftClient mc) {

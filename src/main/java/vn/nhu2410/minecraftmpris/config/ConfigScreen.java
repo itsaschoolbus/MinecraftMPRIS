@@ -141,6 +141,17 @@ public class ConfigScreen {
                         .controller(opt -> BooleanControllerBuilder.create(opt).coloured(true))
                         .build())
                 .build())
+        .category(ConfigCategory.createBuilder()
+                .name(Text.translatable("minecraftmpris.config.category.behavior"))
+                .option(Option.<Boolean>createBuilder()
+                        .name(Text.translatable("minecraftmpris.config.option.plasma_browser_integration"))
+                        .description(OptionDescription.of(Text.translatable("minecraftmpris.config.description.plasma_browser_integration")))
+                        .binding(ConfigHandler.DefaultConfigOptions.usePlasmaBrowserIntegration,
+                                () -> ConfigHandler.HANDLER.instance().usePlasmaBrowserIntegration,
+                                newVal -> ConfigHandler.HANDLER.instance().usePlasmaBrowserIntegration = newVal)
+                        .controller(opt -> BooleanControllerBuilder.create(opt).coloured(true))
+                        .build())
+                .build())
         .save(ConfigHandler.HANDLER::save)
         .build()
         .generateScreen(parent);
